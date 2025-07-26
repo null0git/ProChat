@@ -1,0 +1,310 @@
+{% extends "base.html" %}
+
+{% block title %}Groups - ProChat{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    {% if creating %}
+    <!-- Create Group Form -->
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-plus me-2"></i>Create New Group</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-4 text-center mb-4">
+                                <div class="group-image-preview">
+                                    <div class="group-image-placeholder rounded-circle bg-light d-flex align-items-center justify-content-center mb-3">
+                                        <i class="fas fa-users display-4 text-muted"></i>
+                                    </div>
+                                    <input type="file" class="form-control" name="group_image" accept="image/*">
+                                    <small class="form-text text-muted">Group picture (optional)</small>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Group Name *</label>
+                                    <input type="text" class="form-control" id="name" name="name" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="description" class="form-label">Description</label>
+                                    <textarea class="form-control" id="description" name="description" rows="3" placeholder="Describe your group..."></textarea>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="is_premium" name="is_premium">
+                                        <label class="form-check-label" for="is_premium">
+                                            <i class="fas fa-crown text-warning me-2"></i>Premium Group
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3" id="premiumOptions" style="display: none;">
+                                    <label for="premium_price" class="form-label">Entry Price (USD)</label>
+                                    <input type="number" class="form-control" id="premium_price" name="premium_price" step="0.01" min="0">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('groups') }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check me-2"></i>Create Group
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% elif viewing %}
+    <!-- Group Detail View -->
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header d-flex align-items-center">
+                    <div class="group-avatar me-3">
+                        {% if group.group_image_url %}
+                            <img src="{{ group.group_image_url }}" alt="{{ group.name }}" class="rounded-circle">
+                        {% else %}
+                            <div class="avatar-placeholder rounded-circle bg-primary">
+                                <i class="fas fa-users text-white"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h4 class="mb-0">
+                            {{ group.name }}
+                            {% if group.is_premium %}
+                                <i class="fas fa-crown text-warning ms-2" title="Premium Group"></i>
+                            {% endif %}
+                        </h4>
+                        <small class="text-muted">{{ members|length }} members</small>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    {% if group.description %}
+                    <p class="group-description">{{ group.description }}</p>
+                    <hr>
+                    {% endif %}
+                    
+                    <!-- Group Members -->
+                    <h6><i class="fas fa-users me-2"></i>Members</h6>
+                    <div class="members-list mb-4">
+                        {% for member in members %}
+                        <div class="member-item d-flex align-items-center mb-2">
+                            <div class="member-avatar me-3">
+                                {% if member.profile_image_url %}
+                                    <img src="{{ member.profile_image_url }}" alt="{{ member.get_display_name() }}" class="rounded-circle">
+                                {% else %}
+                                    <div class="avatar-placeholder rounded-circle">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="member-info">
+                                <div class="member-name">{{ member.get_display_name() }}</div>
+                                <small class="text-muted">
+                                    {% set member_membership = member.group_memberships.filter_by(group_id=group.id).first() %}
+                                    {% if member_membership %}
+                                        {{ member_membership.role.title() }}
+                                        {% if member_membership.role == 'admin' %}
+                                            <i class="fas fa-shield-alt text-primary ms-1"></i>
+                                        {% elif member_membership.role == 'moderator' %}
+                                            <i class="fas fa-star text-warning ms-1"></i>
+                                        {% endif %}
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Recent Messages -->
+                    <h6><i class="fas fa-comments me-2"></i>Recent Messages</h6>
+                    <div class="group-messages">
+                        {% for message in messages[:10] %}
+                        <div class="group-message mb-3">
+                            <div class="d-flex align-items-start">
+                                <div class="message-avatar me-3">
+                                    {% if message.sender.profile_image_url %}
+                                        <img src="{{ message.sender.profile_image_url }}" alt="{{ message.sender.get_display_name() }}" class="rounded-circle">
+                                    {% else %}
+                                        <div class="avatar-placeholder rounded-circle">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="message-content flex-grow-1">
+                                    <div class="message-header">
+                                        <strong>{{ message.sender.get_display_name() }}</strong>
+                                        <small class="text-muted ms-2">{{ message.timestamp.strftime('%Y-%m-%d %H:%M') }}</small>
+                                    </div>
+                                    <div class="message-text">{{ message.content }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="card-footer">
+                    <a href="{{ url_for('direct_chat', user_id='group_' + group.id|string) }}" class="btn btn-primary">
+                        <i class="fas fa-comments me-2"></i>Open Chat
+                    </a>
+                    {% if membership.role in ['admin', 'moderator'] %}
+                    <button class="btn btn-outline-primary ms-2">
+                        <i class="fas fa-cog me-2"></i>Manage Group
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% else %}
+    <!-- Groups List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-users me-2"></i>Groups</h2>
+                <a href="{{ url_for('create_group') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Create Group
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- User's Groups -->
+    {% if user_groups %}
+    <div class="row mb-5">
+        <div class="col-12">
+            <h4><i class="fas fa-star me-2"></i>My Groups</h4>
+            <div class="row">
+                {% for group in user_groups %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card group-card">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="group-avatar me-3">
+                                    {% if group.group_image_url %}
+                                        <img src="{{ group.group_image_url }}" alt="{{ group.name }}" class="rounded-circle">
+                                    {% else %}
+                                        <div class="avatar-placeholder rounded-circle bg-primary">
+                                            <i class="fas fa-users text-white"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">
+                                        {{ group.name }}
+                                        {% if group.is_premium %}
+                                            <i class="fas fa-crown text-warning ms-1" title="Premium Group"></i>
+                                        {% endif %}
+                                    </h6>
+                                    <small class="text-muted">{{ group.memberships.count() }} members</small>
+                                </div>
+                            </div>
+                            
+                            {% if group.description %}
+                            <p class="card-text">{{ group.description[:100] }}{% if group.description|length > 100 %}...{% endif %}</p>
+                            {% endif %}
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">Created {{ group.created_at.strftime('%b %d, %Y') }}</small>
+                                <a href="{{ url_for('group_detail', group_id=group.id) }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Public Groups -->
+    {% if public_groups %}
+    <div class="row">
+        <div class="col-12">
+            <h4><i class="fas fa-globe me-2"></i>Discover Groups</h4>
+            <div class="row">
+                {% for group in public_groups %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card group-card">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="group-avatar me-3">
+                                    {% if group.group_image_url %}
+                                        <img src="{{ group.group_image_url }}" alt="{{ group.name }}" class="rounded-circle">
+                                    {% else %}
+                                        <div class="avatar-placeholder rounded-circle bg-primary">
+                                            <i class="fas fa-users text-white"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">
+                                        {{ group.name }}
+                                        {% if group.is_premium %}
+                                            <i class="fas fa-crown text-warning ms-1" title="Premium Group"></i>
+                                        {% endif %}
+                                    </h6>
+                                    <small class="text-muted">{{ group.memberships.count() }} members</small>
+                                </div>
+                            </div>
+                            
+                            {% if group.description %}
+                            <p class="card-text">{{ group.description[:100] }}{% if group.description|length > 100 %}...{% endif %}</p>
+                            {% endif %}
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                {% if group.is_premium %}
+                                    <span class="badge bg-warning">
+                                        <i class="fas fa-dollar-sign me-1"></i>${{ group.premium_price }}
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-success">Free</span>
+                                {% endif %}
+                                
+                                <form method="POST" action="{{ url_for('join_group', group_id=group.id) }}" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-plus me-1"></i>Join
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+</div>
+
+<script>
+// Show/hide premium options
+document.getElementById('is_premium').addEventListener('change', function() {
+    const premiumOptions = document.getElementById('premiumOptions');
+    if (this.checked) {
+        premiumOptions.style.display = 'block';
+    } else {
+        premiumOptions.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

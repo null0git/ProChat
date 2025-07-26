@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <div class="row align-items-center min-vh-100">
+            <div class="col-lg-6">
+                <div class="hero-content">
+                    <h1 class="display-4 fw-bold mb-4">
+                        Welcome to <span class="text-primary">ProChat</span>
+                    </h1>
+                    <p class="lead mb-4">
+                        Experience the future of professional messaging with real-time chat, 
+                        premium groups, stories, and advanced privacy controls.
+                    </p>
+                    
+                    <div class="features-list mb-5">
+                        <div class="feature-item">
+                            <i class="fas fa-bolt text-primary me-3"></i>
+                            <span>Real-time messaging with WebSocket technology</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-users text-primary me-3"></i>
+                            <span>Create and join premium groups</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-shield-alt text-primary me-3"></i>
+                            <span>Advanced privacy and security controls</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-play-circle text-primary me-3"></i>
+                            <span>Share stories with 24-hour expiration</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-search text-primary me-3"></i>
+                            <span>Smart search by username or phone</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-mobile-alt text-primary me-3"></i>
+                            <span>Responsive design for all devices</span>
+                        </div>
+                    </div>
+                    
+                    <div class="cta-buttons">
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg me-3">
+                            <i class="fas fa-sign-in-alt me-2"></i>Get Started
+                        </a>
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Sign Up
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="hero-image">
+                    <div class="chat-preview">
+                        <div class="chat-header">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-placeholder me-3"></div>
+                                <div>
+                                    <h6 class="mb-0">Professional Chat</h6>
+                                    <small class="text-muted">Online now</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-messages">
+                            <div class="message incoming">
+                                <div class="message-content">
+                                    Welcome to ProChat! 👋
+                                </div>
+                                <small class="text-muted">2:30 PM</small>
+                            </div>
+                            <div class="message outgoing">
+                                <div class="message-content">
+                                    This looks amazing! Love the professional design.
+                                </div>
+                                <small class="text-muted">2:32 PM ✓✓</small>
+                            </div>
+                            <div class="message incoming">
+                                <div class="message-content">
+                                    Try our premium groups and stories features!
+                                </div>
+                                <small class="text-muted">2:33 PM</small>
+                            </div>
+                        </div>
+                        <div class="chat-input">
+                            <div class="input-placeholder">
+                                <i class="fas fa-smile me-2"></i>
+                                Type a message...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section id="features" class="features-section py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="display-5 fw-bold">Professional Features</h2>
+                <p class="lead">Everything you need for professional communication</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <h4>Real-time Messaging</h4>
+                    <p>Lightning-fast messaging powered by WebSocket technology for instant communication.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <h4>Premium Groups</h4>
+                    <p>Create exclusive premium groups with cryptocurrency payment integration.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <h4>Privacy Controls</h4>
+                    <p>Granular privacy settings to control who sees your information and activity.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-film"></i>
+                    </div>
+                    <h4>Stories</h4>
+                    <p>Share moments with stories that expire after 24 hours, just like the pros.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-search-plus"></i>
+                    </div>
+                    <h4>Smart Search</h4>
+                    <p>Find users by username, phone number, or name with powerful search capabilities.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <h4>Admin Tools</h4>
+                    <p>Comprehensive admin panel for user management and platform analytics.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h2 class="display-5 fw-bold mb-4">Ready to Get Started?</h2>
+                <p class="lead mb-4">Join thousands of professionals using ProChat for their daily communication needs.</p>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-light btn-lg">
+                    <i class="fas fa-arrow-right me-2"></i>Start Chatting Now
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Animate feature cards on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-in');
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.feature-card').forEach(card => {
+        observer.observe(card);
+    });
+</script>
+{% endblock %}

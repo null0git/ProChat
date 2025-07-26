@@ -1,0 +1,328 @@
+{% extends "base.html" %}
+
+{% block title %}Search - ProChat{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-search me-2"></i>Find People</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Search Form -->
+                    <form method="GET" class="mb-4">
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" class="form-control" name="q" value="{{ query }}" 
+                                   placeholder="Search by username, phone number, or name..." 
+                                   autocomplete="off" autofocus>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search me-2"></i>Search
+                            </button>
+                        </div>
+                        <small class="form-text text-muted mt-2">
+                            <i class="fas fa-info-circle me-1"></i>
+                            You can search by username, phone number, first name, or last name
+                        </small>
+                    </form>
+
+                    <!-- Search Suggestions -->
+                    {% if not query %}
+                    <div class="search-suggestions">
+                        <h6><i class="fas fa-lightbulb me-2"></i>Search Tips</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="suggestion-item">
+                                    <i class="fas fa-at text-primary me-2"></i>
+                                    <strong>Username:</strong> @johndoe
+                                </div>
+                                <div class="suggestion-item">
+                                    <i class="fas fa-phone text-success me-2"></i>
+                                    <strong>Phone:</strong> +1234567890
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="suggestion-item">
+                                    <i class="fas fa-user text-info me-2"></i>
+                                    <strong>Name:</strong> John Doe
+                                </div>
+                                <div class="suggestion-item">
+                                    <i class="fas fa-envelope text-warning me-2"></i>
+                                    <strong>Email:</strong> john@example.com
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Search Results -->
+                    {% if query %}
+                    <div class="search-results">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="mb-0">
+                                Search Results for "{{ query }}"
+                            </h6>
+                            {% if results %}
+                            <small class="text-muted">{{ results|length }} result(s) found</small>
+                            {% endif %}
+                        </div>
+
+                        {% if results %}
+                        <div class="results-list">
+                            {% for user in results %}
+                            <div class="result-item">
+                                <div class="d-flex align-items-center">
+                                    <div class="result-avatar me-3">
+                                        {% if user.profile_image_url %}
+                                            <img src="{{ user.profile_image_url }}" alt="{{ user.get_display_name() }}" 
+                                                 class="rounded-circle" width="50" height="50" style="object-fit: cover;">
+                                        {% else %}
+                                            <div class="avatar-placeholder rounded-circle">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                        {% endif %}
+                                        {% if user.is_online %}
+                                            <div class="online-indicator"></div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="result-info flex-grow-1">
+                                        <div class="result-name">
+                                            <strong>{{ user.get_display_name() }}</strong>
+                                            {% if user.username %}
+                                                <span class="text-muted ms-2">@{{ user.username }}</span>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="result-details">
+                                            {% if user.phone_number and user.show_phone != 'nobody' %}
+                                                <small class="text-muted me-3">
+                                                    <i class="fas fa-phone me-1"></i>{{ user.phone_number }}
+                                                </small>
+                                            {% endif %}
+                                            
+                                            {% if user.bio and user.show_bio != 'nobody' %}
+                                                <small class="text-muted">
+                                                    {{ user.bio[:50] }}{% if user.bio|length > 50 %}...{% endif %}
+                                                </small>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="result-status">
+                                            {% if user.is_online %}
+                                                <small class="text-success">
+                                                    <i class="fas fa-circle me-1"></i>Online
+                                                </small>
+                                            {% elif user.show_last_seen != 'nobody' %}
+                                                <small class="text-muted">
+                                                    <i class="fas fa-clock me-1"></i>
+                                                    Last seen {{ user.last_seen.strftime('%b %d, %Y at %H:%M') }}
+                                                </small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="result-actions">
+                                        <a href="{{ url_for('direct_chat', user_id=user.id) }}" 
+                                           class="btn btn-primary btn-sm me-2">
+                                            <i class="fas fa-comments me-1"></i>Chat
+                                        </a>
+                                        
+                                        <div class="dropdown">
+                                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" 
+                                                    type="button" data-bs-toggle="dropdown">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <a class="dropdown-item" href="{{ url_for('profile') }}?user={{ user.id }}">
+                                                        <i class="fas fa-user me-2"></i>View Profile
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <button class="dropdown-item" onclick="addContact('{{ user.id }}')">
+                                                        <i class="fas fa-user-plus me-2"></i>Add Contact
+                                                    </button>
+                                                </li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <button class="dropdown-item text-danger" onclick="blockUser('{{ user.id }}')">
+                                                        <i class="fas fa-ban me-2"></i>Block User
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        {% else %}
+                        <!-- No Results -->
+                        <div class="no-results text-center py-5">
+                            <i class="fas fa-search display-1 text-muted mb-4"></i>
+                            <h4>No users found</h4>
+                            <p class="text-muted">
+                                No users match your search criteria for "{{ query }}".
+                                <br>Try searching with different keywords.
+                            </p>
+                            <div class="search-tips mt-4">
+                                <h6>Try searching for:</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-check text-success me-2"></i>Complete username (e.g., "johndoe")</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Full phone number with country code</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>First or last name</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Part of the name or username</li>
+                                </ul>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-users display-4 text-primary mb-3"></i>
+                            <h5>Join Groups</h5>
+                            <p class="text-muted">Discover and join interesting groups</p>
+                            <a href="{{ url_for('groups') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-arrow-right me-2"></i>Browse Groups
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-play-circle display-4 text-success mb-3"></i>
+                            <h5>View Stories</h5>
+                            <p class="text-muted">Check out the latest stories from users</p>
+                            <a href="{{ url_for('stories') }}" class="btn btn-outline-success">
+                                <i class="fas fa-arrow-right me-2"></i>View Stories
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Real-time search suggestions
+let searchTimeout;
+const searchInput = document.querySelector('input[name="q"]');
+
+if (searchInput) {
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim();
+        
+        if (query.length > 2) {
+            searchTimeout = setTimeout(() => {
+                // Implement real-time search suggestions here
+                console.log('Searching for:', query);
+            }, 300);
+        }
+    });
+}
+
+function addContact(userId) {
+    // Add contact functionality
+    fetch('/api/add_contact', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user_id: userId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            showToast('Contact added successfully!', 'success');
+        } else {
+            showToast('Failed to add contact.', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('An error occurred.', 'error');
+    });
+}
+
+function blockUser(userId) {
+    if (confirm('Are you sure you want to block this user?')) {
+        // Block user functionality
+        fetch('/api/block_user', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ user_id: userId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showToast('User blocked successfully!', 'success');
+                // Remove from search results
+                event.target.closest('.result-item').remove();
+            } else {
+                showToast('Failed to block user.', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('An error occurred.', 'error');
+        });
+    }
+}
+
+function showToast(message, type) {
+    // Simple toast notification
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type === 'error' ? 'danger' : 'success'} alert-dismissible fade show position-fixed`;
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    toast.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(toast);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.parentNode.removeChild(toast);
+        }
+    }, 3000);
+}
+
+// Highlight search terms in results
+function highlightSearchTerms() {
+    const query = '{{ query }}';
+    if (query) {
+        const resultNames = document.querySelectorAll('.result-name');
+        resultNames.forEach(element => {
+            const text = element.innerHTML;
+            const highlighted = text.replace(new RegExp(query, 'gi'), `<mark>$&</mark>`);
+            element.innerHTML = highlighted;
+        });
+    }
+}
+
+// Run highlight on page load
+document.addEventListener('DOMContentLoaded', highlightSearchTerms);
+</script>
+{% endblock %}

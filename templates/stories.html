@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}Stories - ProChat{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    {% if creating %}
+    <!-- Create Story Form -->
+    <div class="row">
+        <div class="col-md-6 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-plus me-2"></i>Share Your Story</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="media" class="form-label">Upload Media</label>
+                            <input type="file" class="form-control" id="media" name="media" accept="image/*,video/*">
+                            <small class="form-text text-muted">Images and videos only</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="content" class="form-label">Caption</label>
+                            <textarea class="form-control" id="content" name="content" rows="3" placeholder="What's on your mind?"></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="visibility" class="form-label">Who can see this story?</label>
+                            <select class="form-select" id="visibility" name="visibility">
+                                <option value="everyone">Everyone</option>
+                                <option value="contacts">My Contacts</option>
+                                <option value="nobody">Only Me</option>
+                            </select>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('stories') }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-share me-2"></i>Share Story
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% elif viewing_story %}
+    <!-- Story Viewer -->
+    <div class="story-viewer">
+        <div class="story-header">
+            <div class="d-flex align-items-center">
+                <div class="story-author-avatar me-3">
+                    {% if viewing_story.author.profile_image_url %}
+                        <img src="{{ viewing_story.author.profile_image_url }}" alt="{{ viewing_story.author.get_display_name() }}" class="rounded-circle">
+                    {% else %}
+                        <div class="avatar-placeholder rounded-circle">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                <div>
+                    <h6 class="mb-0 text-white">{{ viewing_story.author.get_display_name() }}</h6>
+                    <small class="text-light">{{ viewing_story.created_at.strftime('%H:%M') }}</small>
+                </div>
+            </div>
+            <div class="story-actions">
+                <a href="{{ url_for('stories') }}" class="btn btn-outline-light btn-sm">
+                    <i class="fas fa-times"></i>
+                </a>
+            </div>
+        </div>
+        
+        <div class="story-content">
+            {% if viewing_story.media_url %}
+                {% if viewing_story.media_type == 'image' %}
+                    <img src="{{ viewing_story.media_url }}" alt="Story" class="story-media">
+                {% elif viewing_story.media_type == 'video' %}
+                    <video src="{{ viewing_story.media_url }}" class="story-media" controls autoplay></video>
+                {% endif %}
+            {% endif %}
+            
+            {% if viewing_story.content %}
+            <div class="story-caption">
+                <p class="text-white">{{ viewing_story.content }}</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="story-footer">
+            <div class="story-stats">
+                <small class="text-light">
+                    <i class="fas fa-eye me-1"></i>{{ viewing_story.view_count }} views
+                </small>
+            </div>
+        </div>
+    </div>
+    
+    {% else %}
+    <!-- Stories List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-play-circle me-2"></i>Stories</h2>
+                <a href="{{ url_for('create_story') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Share Story
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- My Stories -->
+    {% if my_stories %}
+    <div class="row mb-5">
+        <div class="col-12">
+            <h4><i class="fas fa-user me-2"></i>My Stories</h4>
+            <div class="stories-grid">
+                {% for story in my_stories %}
+                <div class="story-card" onclick="viewStory({{ story.id }})">
+                    <div class="story-preview">
+                        {% if story.media_url %}
+                            {% if story.media_type == 'image' %}
+                                <img src="{{ story.media_url }}" alt="Story">
+                            {% elif story.media_type == 'video' %}
+                                <video src="{{ story.media_url }}" muted></video>
+                            {% endif %}
+                        {% else %}
+                            <div class="story-text-preview">
+                                <p>{{ story.content[:50] }}{% if story.content|length > 50 %}...{% endif %}</p>
+                            </div>
+                        {% endif %}
+                        <div class="story-overlay">
+                            <div class="story-time">{{ story.created_at.strftime('%H:%M') }}</div>
+                            <div class="story-stats">
+                                <i class="fas fa-eye me-1"></i>{{ story.view_count }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="story-meta">
+                        <small class="text-muted">
+                            {% set time_left = story.expires_at - moment.utcnow() %}
+                            {% if time_left.total_seconds() > 3600 %}
+                                {{ (time_left.total_seconds() // 3600)|int }}h left
+                            {% elif time_left.total_seconds() > 60 %}
+                                {{ (time_left.total_seconds() // 60)|int }}m left
+                            {% else %}
+                                Expiring soon
+                            {% endif %}
+                        </small>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- All Stories -->
+    {% if active_stories %}
+    <div class="row">
+        <div class="col-12">
+            <h4><i class="fas fa-globe me-2"></i>Recent Stories</h4>
+            <div class="stories-list">
+                {% for story in active_stories %}
+                <div class="story-item" onclick="viewStory({{ story.id }})">
+                    <div class="story-avatar">
+                        {% if story.author.profile_image_url %}
+                            <img src="{{ story.author.profile_image_url }}" alt="{{ story.author.get_display_name() }}" class="rounded-circle">
+                        {% else %}
+                            <div class="avatar-placeholder rounded-circle">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        {% endif %}
+                        <div class="story-ring"></div>
+                    </div>
+                    <div class="story-info">
+                        <div class="story-author">{{ story.author.get_display_name() }}</div>
+                        <div class="story-time">{{ story.created_at.strftime('%H:%M') }}</div>
+                    </div>
+                    <div class="story-preview-thumb">
+                        {% if story.media_url %}
+                            {% if story.media_type == 'image' %}
+                                <img src="{{ story.media_url }}" alt="Story">
+                            {% elif story.media_type == 'video' %}
+                                <video src="{{ story.media_url }}" muted></video>
+                            {% endif %}
+                        {% else %}
+                            <div class="text-preview">
+                                <i class="fas fa-quote-left"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="row">
+        <div class="col-12 text-center">
+            <div class="empty-state">
+                <i class="fas fa-play-circle display-1 text-muted mb-4"></i>
+                <h4>No Stories Yet</h4>
+                <p class="text-muted">Be the first to share your story!</p>
+                <a href="{{ url_for('create_story') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Create Your First Story
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+</div>
+
+<script>
+function viewStory(storyId) {
+    window.location.href = `/stories/${storyId}/view`;
+}
+
+// Auto-play videos on hover
+document.querySelectorAll('.story-card video, .story-preview-thumb video').forEach(video => {
+    video.addEventListener('mouseenter', function() {
+        this.play();
+    });
+    
+    video.addEventListener('mouseleave', function() {
+        this.pause();
+        this.currentTime = 0;
+    });
+});
+</script>
+{% endblock %}

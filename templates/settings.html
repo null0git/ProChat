@@ -1,0 +1,374 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - ProChat{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-10 mx-auto">
+            <h2><i class="fas fa-cog me-2"></i>Settings</h2>
+            
+            <!-- Settings Navigation -->
+            <div class="card">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" id="settingsTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="privacy-tab" data-bs-toggle="tab" data-bs-target="#privacy" type="button" role="tab">
+                                <i class="fas fa-shield-alt me-2"></i>Privacy
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab">
+                                <i class="fas fa-lock me-2"></i>Security
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="notifications-tab" data-bs-toggle="tab" data-bs-target="#notifications" type="button" role="tab">
+                                <i class="fas fa-bell me-2"></i>Notifications
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="sessions-tab" data-bs-toggle="tab" data-bs-target="#sessions" type="button" role="tab">
+                                <i class="fas fa-desktop me-2"></i>Sessions
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="card-body">
+                    <div class="tab-content" id="settingsTabContent">
+                        <!-- Privacy Settings -->
+                        <div class="tab-pane fade show active" id="privacy" role="tabpanel">
+                            <h5><i class="fas fa-shield-alt me-2"></i>Privacy Settings</h5>
+                            <p class="text-muted">Control who can see your information and activity</p>
+                            
+                            <form method="POST" action="{{ url_for('edit_profile') }}">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Who can see your last seen status</label>
+                                        <select class="form-select" name="show_last_seen">
+                                            <option value="everyone" {{ 'selected' if current_user.show_last_seen == 'everyone' }}>Everyone</option>
+                                            <option value="contacts" {{ 'selected' if current_user.show_last_seen == 'contacts' }}>My Contacts</option>
+                                            <option value="nobody" {{ 'selected' if current_user.show_last_seen == 'nobody' }}>Nobody</option>
+                                        </select>
+                                        <small class="form-text text-muted">Controls who can see when you were last online</small>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Who can see your phone number</label>
+                                        <select class="form-select" name="show_phone">
+                                            <option value="everyone" {{ 'selected' if current_user.show_phone == 'everyone' }}>Everyone</option>
+                                            <option value="contacts" {{ 'selected' if current_user.show_phone == 'contacts' }}>My Contacts</option>
+                                            <option value="nobody" {{ 'selected' if current_user.show_phone == 'nobody' }}>Nobody</option>
+                                        </select>
+                                        <small class="form-text text-muted">Controls who can see your phone number in search</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Who can see your bio</label>
+                                        <select class="form-select" name="show_bio">
+                                            <option value="everyone" {{ 'selected' if current_user.show_bio == 'everyone' }}>Everyone</option>
+                                            <option value="contacts" {{ 'selected' if current_user.show_bio == 'contacts' }}>My Contacts</option>
+                                            <option value="nobody" {{ 'selected' if current_user.show_bio == 'nobody' }}>Nobody</option>
+                                        </select>
+                                        <small class="form-text text-muted">Controls who can see your profile bio</small>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Read Receipts</label>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="read_receipts" name="read_receipts" {{ 'checked' if current_user.read_receipts }}>
+                                            <label class="form-check-label" for="read_receipts">
+                                                Send read receipts
+                                            </label>
+                                        </div>
+                                        <small class="form-text text-muted">Let others know when you've read their messages</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h6>Blocked Users</h6>
+                                    <div id="blockedUsersList">
+                                        <!-- Blocked users will be loaded here -->
+                                        <p class="text-muted">No blocked users</p>
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Save Privacy Settings
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <!-- Security Settings -->
+                        <div class="tab-pane fade" id="security" role="tabpanel">
+                            <h5><i class="fas fa-lock me-2"></i>Security Settings</h5>
+                            <p class="text-muted">Manage your account security and authentication</p>
+                            
+                            <div class="security-section mb-4">
+                                <h6>Two-Factor Authentication</h6>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <p class="mb-1">Add an extra layer of security to your account</p>
+                                        <small class="text-muted">Currently disabled</small>
+                                    </div>
+                                    <button class="btn btn-outline-primary">Enable 2FA</button>
+                                </div>
+                            </div>
+                            
+                            <div class="security-section mb-4">
+                                <h6>Login Alerts</h6>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="loginAlerts" checked>
+                                    <label class="form-check-label" for="loginAlerts">
+                                        Get notified of new login attempts
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="security-section mb-4">
+                                <h6>Data Export</h6>
+                                <p class="mb-2">Download a copy of your data</p>
+                                <button class="btn btn-outline-secondary">
+                                    <i class="fas fa-download me-2"></i>Request Data Export
+                                </button>
+                            </div>
+                            
+                            <div class="security-section">
+                                <h6 class="text-danger">Danger Zone</h6>
+                                <p class="mb-2">Permanent actions that cannot be undone</p>
+                                <button class="btn btn-outline-danger">
+                                    <i class="fas fa-trash me-2"></i>Delete Account
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Notifications Settings -->
+                        <div class="tab-pane fade" id="notifications" role="tabpanel">
+                            <h5><i class="fas fa-bell me-2"></i>Notification Settings</h5>
+                            <p class="text-muted">Control when and how you receive notifications</p>
+                            
+                            <div class="notification-section mb-4">
+                                <h6>Message Notifications</h6>
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" id="messageNotifications" checked>
+                                    <label class="form-check-label" for="messageNotifications">
+                                        New message notifications
+                                    </label>
+                                </div>
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" id="groupNotifications" checked>
+                                    <label class="form-check-label" for="groupNotifications">
+                                        Group message notifications
+                                    </label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="mentionNotifications" checked>
+                                    <label class="form-check-label" for="mentionNotifications">
+                                        Mention notifications
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="notification-section mb-4">
+                                <h6>Story Notifications</h6>
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" id="storyNotifications">
+                                    <label class="form-check-label" for="storyNotifications">
+                                        New story notifications
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="notification-section mb-4">
+                                <h6>System Notifications</h6>
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" id="securityNotifications" checked>
+                                    <label class="form-check-label" for="securityNotifications">
+                                        Security alerts
+                                    </label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="updateNotifications">
+                                    <label class="form-check-label" for="updateNotifications">
+                                        Feature updates
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Notification Settings
+                            </button>
+                        </div>
+                        
+                        <!-- Active Sessions -->
+                        <div class="tab-pane fade" id="sessions" role="tabpanel">
+                            <h5><i class="fas fa-desktop me-2"></i>Active Sessions</h5>
+                            <p class="text-muted">Manage your active login sessions across devices</p>
+                            
+                            <div class="sessions-list">
+                                {% for session in active_sessions %}
+                                <div class="session-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="session-info">
+                                            <div class="session-device">
+                                                <i class="fas fa-desktop me-2"></i>
+                                                <strong>{{ session.device_info or 'Unknown Device' }}</strong>
+                                                {% if loop.first %}
+                                                    <span class="badge bg-success ms-2">Current Session</span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="session-details">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-map-marker-alt me-1"></i>{{ session.ip_address }}
+                                                    <span class="mx-2">•</span>
+                                                    <i class="fas fa-clock me-1"></i>Last active: {{ session.last_activity.strftime('%b %d, %Y at %H:%M') }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <div class="session-actions">
+                                            {% if not loop.first %}
+                                            <button class="btn btn-outline-danger btn-sm" onclick="terminateSession('{{ session.id }}')">
+                                                <i class="fas fa-sign-out-alt me-1"></i>Terminate
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="text-center py-4">
+                                    <i class="fas fa-desktop display-4 text-muted mb-3"></i>
+                                    <h6>No Active Sessions</h6>
+                                    <p class="text-muted">You don't have any active sessions</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            
+                            {% if active_sessions|length > 1 %}
+                            <div class="mt-4">
+                                <button class="btn btn-outline-danger" onclick="terminateAllSessions()">
+                                    <i class="fas fa-power-off me-2"></i>Terminate All Other Sessions
+                                </button>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function terminateSession(sessionId) {
+    if (confirm('Are you sure you want to terminate this session?')) {
+        fetch('/api/terminate_session', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ session_id: sessionId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                location.reload();
+            } else {
+                alert('Failed to terminate session');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred');
+        });
+    }
+}
+
+function terminateAllSessions() {
+    if (confirm('Are you sure you want to terminate all other sessions? This will log you out from all other devices.')) {
+        fetch('/api/terminate_all_sessions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                location.reload();
+            } else {
+                alert('Failed to terminate sessions');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred');
+        });
+    }
+}
+
+// Load blocked users
+function loadBlockedUsers() {
+    fetch('/api/blocked_users')
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('blockedUsersList');
+            if (data.users && data.users.length > 0) {
+                container.innerHTML = data.users.map(user => `
+                    <div class="blocked-user-item d-flex justify-content-between align-items-center mb-2">
+                        <div class="d-flex align-items-center">
+                            <img src="${user.profile_image_url || '/static/images/default-avatar.png'}" 
+                                 alt="${user.name}" class="rounded-circle me-2" width="32" height="32" style="object-fit: cover;">
+                            <span>${user.name}</span>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary" onclick="unblockUser('${user.id}')">
+                            Unblock
+                        </button>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = '<p class="text-muted">No blocked users</p>';
+            }
+        })
+        .catch(error => console.error('Error loading blocked users:', error));
+}
+
+function unblockUser(userId) {
+    fetch('/api/unblock_user', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user_id: userId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            loadBlockedUsers(); // Refresh the list
+        } else {
+            alert('Failed to unblock user');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred');
+    });
+}
+
+// Load blocked users when privacy tab is shown
+document.getElementById('privacy-tab').addEventListener('shown.bs.tab', function() {
+    loadBlockedUsers();
+});
+
+// Load on page load if privacy tab is active
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('privacy').classList.contains('show')) {
+        loadBlockedUsers();
+    }
+});
+</script>
+{% endblock %}

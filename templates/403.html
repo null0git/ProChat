@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block title %}Error - ProChat{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row min-vh-100 align-items-center justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="error-page">
+                <!-- Error Icon -->
+                <div class="error-icon mb-4">
+                    {% if error_message and 'not found' in error_message.lower() %}
+                        <i class="fas fa-search display-1 text-muted"></i>
+                    {% elif error_message and 'access denied' in error_message.lower() %}
+                        <i class="fas fa-lock display-1 text-warning"></i> 
+                    {% elif error_message and 'server error' in error_message.lower() %}
+                        <i class="fas fa-exclamation-triangle display-1 text-danger"></i>
+                    {% else %}
+                        <i class="fas fa-exclamation-circle display-1 text-muted"></i>
+                    {% endif %}
+                </div>
+                
+                <!-- Error Title -->
+                <h1 class="display-4 fw-bold mb-3">
+                    {% if error_message and 'not found' in error_message.lower() %}
+                        Page Not Found
+                    {% elif error_message and 'access denied' in error_message.lower() %}
+                        Access Denied
+                    {% elif error_message and 'server error' in error_message.lower() %}
+                        Server Error
+                    {% else %}
+                        Oops! Something went wrong
+                    {% endif %}
+                </h1>
+                
+                <!-- Error Message -->
+                <p class="lead text-muted mb-4">
+                    {% if error_message %}
+                        {{ error_message }}
+                    {% else %}
+                        We're sorry, but something unexpected happened. Please try again.
+                    {% endif %}
+                </p>
+                
+                <!-- Error Details -->
+                <div class="error-details mb-4">
+                    {% if error_message and 'not found' in error_message.lower() %}
+                        <p class="text-muted">
+                            The page you're looking for might have been moved, deleted, or you entered the wrong URL.
+                        </p>
+                    {% elif error_message and 'access denied' in error_message.lower() %}
+                        <p class="text-muted">
+                            You don't have permission to access this resource. Please check your credentials or contact support.
+                        </p>
+                    {% elif error_message and 'server error' in error_message.lower() %}
+                        <p class="text-muted">
+                            Our servers are experiencing some issues. We're working to fix this problem.
+                        </p>
+                    {% else %}
+                        <p class="text-muted">
+                            This might be a temporary issue. Please try refreshing the page or come back later.
+                        </p>
+                    {% endif %}
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="error-actions">
+                    {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg me-3">
+                            <i class="fas fa-home me-2"></i>Back to Home
+                        </a>
+                        
+                        <button onclick="history.back()" class="btn btn-outline-secondary btn-lg me-3">
+                            <i class="fas fa-arrow-left me-2"></i>Go Back
+                        </button>
+                        
+                        <button onclick="location.reload()" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-refresh me-2"></i>Try Again
+                        </button>
+                    {% else %}
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg me-3">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login
+                        </a>
+                        
+                        <a href="/" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-home me-2"></i>Home
+                        </a>
+                    {% endif %}
+                </div>
+                
+                <!-- Help Section -->
+                <div class="error-help mt-5">
+                    <h6>Need Help?</h6>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="help-item">
+                                <i class="fas fa-question-circle text-primary mb-2"></i>
+                                <h6>FAQ</h6>
+                                <small class="text-muted">Check our frequently asked questions</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="help-item">
+                                <i class="fas fa-life-ring text-success mb-2"></i>
+                                <h6>Support</h6>
+                                <small class="text-muted">Contact our support team</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="help-item">
+                                <i class="fas fa-bug text-warning mb-2"></i>
+                                <h6>Report Bug</h6>
+                                <small class="text-muted">Help us improve by reporting issues</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Error Code -->
+                {% if request.endpoint %}
+                <div class="error-code mt-4">
+                    <small class="text-muted">
+                        Error occurred on: {{ request.endpoint }}
+                        <br>
+                        Request ID: {{ request.headers.get('X-Request-ID', 'N/A') }}
+                        <br>
+                        Time: Server Error
+                    </small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Help Button -->
+<div class="position-fixed bottom-0 end-0 p-3">
+    <button class="btn btn-primary rounded-circle" data-bs-toggle="modal" data-bs-target="#helpModal" style="width: 60px; height: 60px;">
+        <i class="fas fa-question"></i>
+    </button>
+</div>
+
+<!-- Help Modal -->
+<div class="modal fade" id="helpModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-life-ring me-2"></i>Need Help?
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="help-options">
+                    <div class="help-option mb-3">
+                        <h6><i class="fas fa-refresh me-2"></i>Try These Steps:</h6>
+                        <ul class="list-unstyled ms-3">
+                            <li><i class="fas fa-check text-success me-2"></i>Refresh the page</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Clear your browser cache</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Check your internet connection</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Try again in a few minutes</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="help-option mb-3">
+                        <h6><i class="fas fa-envelope me-2"></i>Contact Support:</h6>
+                        <p class="text-muted">
+                            If the problem persists, please contact our support team with the error details above.
+                        </p>
+                        <button class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-envelope me-2"></i>Send Support Request
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Auto-retry functionality
+let retryCount = 0;
+const maxRetries = 3;
+
+function autoRetry() {
+    if (retryCount < maxRetries) {
+        retryCount++;
+        console.log(`Auto-retry attempt ${retryCount}/${maxRetries}`);
+        
+        // Show loading indicator
+        showLoading();
+        
+        // Retry after 2 seconds
+        setTimeout(() => {
+            location.reload();
+        }, 2000);
+    }
+}
+
+// Check if this is a server error and auto-retry
+document.addEventListener('DOMContentLoaded', function() {
+    const errorMessage = '{{ error_message | default("") }}';
+    if (errorMessage.toLowerCase().includes('server error')) {
+        // Auto-retry after 5 seconds for server errors
+        setTimeout(autoRetry, 5000);
+    }
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Alt + H for home
+    if (e.altKey && e.key === 'h') {
+        e.preventDefault();
+        {% if current_user.is_authenticated %}
+            window.location.href = '{{ url_for("index") }}';
+        {% else %}
+            window.location.href = '/';
+        {% endif %}
+    }
+    
+    // Alt + R for reload
+    if (e.altKey && e.key === 'r') {
+        e.preventDefault();
+        location.reload();
+    }
+    
+    // Alt + B for back
+    if (e.altKey && e.key === 'b') {
+        e.preventDefault();
+        history.back();
+    }
+});
+
+// Track error for analytics
+if (typeof gtag !== 'undefined') {
+    gtag('event', 'error_page_view', {
+        error_message: '{{ error_message | default("Unknown error") }}',
+        page_location: window.location.href,
+        user_agent: navigator.userAgent
+    });
+}
+</script>
+{% endblock %}
