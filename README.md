@@ -26,8 +26,8 @@ A full-featured real-time chat application built with Flask and WebSocket techno
 ### Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/prochat.git
-cd prochat
+git clone https://github.com/null0git/ProChat.git
+cd ProChat
 ```
 
 ### Step 2: Set Up Virtual Environment
